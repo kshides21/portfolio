@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Katie Shideler — Frontend Developer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset ─────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    /* ─── Tokens ─────────────────────────────────────────── */
+    :root {
+      --bg:         #080808;
+      --bg-2:       #0f0f0f;
+      --text:       #F2EEE5;
+      --text-muted: #666560;
+      --accent:     #FF4D2E;
+      --accent-dim: rgba(255, 77, 46, 0.12);
+      --border:     rgba(242, 238, 229, 0.08);
+      --border-h:   rgba(255, 77, 46, 0.35);
+      --f-display:  'Archivo', sans-serif;
+      --f-body:     'Space Grotesk', sans-serif;
+      --ease:       cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--f-body);
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Noise Overlay ──────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9998;
+    }
+
+    /* ─── Custom Cursor ──────────────────────────────────── */
+    .cur-dot {
+      position: fixed;
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s, background 0.2s;
+    }
+    .cur-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1px solid rgba(255,77,46,0.45);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+    body.hovering .cur-dot  { transform: translate(-50%, -50%) scale(2.5); }
+    body.hovering .cur-ring { transform: translate(-50%, -50%) scale(1.6); border-color: rgba(255,77,46,0.7); }
+
+    /* ─── Navigation ─────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 56px;
+      transition: transform 0.4s var(--ease), background 0.4s;
+    }
+    nav.scrolled { background: rgba(8,8,8,0.88); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+    nav.hidden   { transform: translateY(-100%); }
+
+    .nav-logo {
+      font-family: var(--f-display);
+      font-weight: 800;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-logo em { color: var(--accent); font-style: normal; }
+
+    .nav-links {
+      display: flex;
+      gap: 48px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      font-family: var(--f-body);
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 9px 22px;
+      border-radius: 100px;
+      letter-spacing: 0.04em;
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+    .nav-cta:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+    /* ─── Hero ───────────────────────────────────────────── */
+    .hero {
+      min-height: 100svh;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      padding: 0 56px 72px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background grid dots */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,77,46,0.06) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    /* Gradient spotlight */
+    .hero-glow {
+      position: absolute;
+      top: -20%;
+      right: -10%;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(255,77,46,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      position: absolute;
+      top: 140px;
+      right: 56px;
+      max-width: 300px;
+      text-align: right;
+    }
+    .hero-available {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+    .pulse-dot {
+      width: 7px; height: 7px;
+      background: #4ADE80;
+      border-radius: 50%;
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.45); }
+      50%      { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+    }
+    .hero-eyebrow p {
+      font-size: 16px;
+      line-height: 1.75;
+      color: rgba(242,238,229,0.45);
+    }
+
+    .hero-content { align-self: end; }
+
+    .hero-headline {
+      font-family: var(--f-display);
+      font-weight: 900;
+      font-size: clamp(76px, 13vw, 200px);
+      line-height: 0.88;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+      margin-bottom: 52px;
+    }
+    .hl-solid   { display: block; color: var(--text); }
+    .hl-outline {
+      display: block;
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--accent);
+    }
+
+    .hero-footer {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .hero-meta { display: flex; flex-direction: column; gap: 6px; }
+    .hero-meta .label {
+      font-size: 16px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .hero-meta .value {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text);
+    }
+    .hero-meta a { color: inherit; text-decoration: none; transition: color 0.3s; }
+    .hero-meta a:hover { color: var(--accent); }
+
+    .scroll-hint {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 16px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .scroll-track {
+      width: 56px; height: 2px;
+      background: rgba(242,238,229,0.12);
+      position: relative;
+      overflow: hidden;
+    }
+    .scroll-track::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      animation: trackAnim 2s ease-in-out infinite;
+    }
+    @keyframes trackAnim {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ─── Marquee ────────────────────────────────────────── */
+    .marquee-wrap {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 22px 0;
+      overflow: hidden;
+    }
+    .marquee-inner {
+      display: flex;
+      white-space: nowrap;
+      animation: marquee 28s linear infinite;
+    }
+    .marquee-inner:hover { animation-play-state: paused; }
+    .mi {
+      display: inline-flex;
+      align-items: center;
+      gap: 20px;
+      padding: 0 32px;
+      font-family: var(--f-display);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .mi-sep {
+      width: 4px; height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── Section Shell ──────────────────────────────────── */
+    .section { padding: 128px 56px; }
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 80px;
+    }
+    .section-label .sn { color: var(--accent); }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      max-width: 48px;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider { height: 1px; background: var(--border); margin: 0 56px; }
+
+    /* ─── Reveal ─────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.85s var(--ease), transform 0.85s var(--ease);
+    }
+    .reveal.in { opacity: 1; transform: none; }
+    .d1 { transition-delay: 0.1s; }
+    .d2 { transition-delay: 0.2s; }
+    .d3 { transition-delay: 0.3s; }
+    .d4 { transition-delay: 0.4s; }
+
+    /* ─── About ──────────────────────────────────────────── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 96px;
+      align-items: start;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .stat {
+      border-top: 1px solid var(--border);
+      padding: 32px 24px 32px 0;
+    }
+    .stat:nth-child(even) { padding-left: 32px; border-left: 1px solid var(--border); }
+    .stat-num {
+      font-family: var(--f-display);
+      font-size: 72px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--text);
+    }
+    .stat-num sup { font-size: 32px; color: var(--accent); vertical-align: super; }
+    .stat-desc {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    .about-right h2 {
+      font-family: var(--f-display);
+      font-weight: 800;
+      font-size: clamp(26px, 3.5vw, 44px);
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      margin-bottom: 28px;
+    }
+    .about-right h2 em { color: var(--accent); font-style: italic; }
+
+    .about-right p {
+      font-size: 16px;
+      line-height: 1.85;
+      color: rgba(242,238,229,0.55);
+      margin-bottom: 20px;
+      max-width: 52ch;
+    }
+
+    .interests {
+      margin-top: 40px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .interests-title {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      padding: 6px 16px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: rgba(242,238,229,0.5);
+      transition: border-color 0.3s, color 0.3s;
+      cursor: default;
+    }
+    .tag:hover { border-color: var(--border-h); color: var(--text); }
+
+    /* ─── Experience ─────────────────────────────────────── */
+    .exp-list { display: flex; flex-direction: column; }
+    .exp-item {
+      display: grid;
+      grid-template-columns: 64px 1fr 160px;
+      gap: 40px;
+      padding: 52px 0;
+      border-top: 1px solid var(--border);
+      transition: padding-left 0.4s var(--ease);
+      cursor: default;
+    }
+    .exp-item:hover { padding-left: 12px; }
+    .exp-n {
+      font-family: var(--f-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      padding-top: 6px;
+    }
+    .exp-company {
+      font-family: var(--f-display);
+      font-weight: 800;
+      font-size: clamp(22px, 3vw, 40px);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .exp-role {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      margin-bottom: 20px;
+    }
+    .exp-bullets { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+    .exp-bullets li {
+      font-size: 18px;
+      line-height: 1.65;
+      color: rgba(242,238,229,0.45);
+      padding-left: 18px;
+      position: relative;
+    }
+    .exp-bullets li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: rgba(255,77,46,0.4);
+      font-size: 16px;
+    }
+    .exp-date {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-align: right;
+      padding-top: 6px;
+      line-height: 1.7;
+    }
+
+    /* ─── Projects ───────────────────────────────────────── */
+    .proj-list { display: flex; flex-direction: column; }
+    .proj-item {
+      display: grid;
+      grid-template-columns: 64px 1fr 40px;
+      gap: 40px;
+      padding: 56px 0;
+      border-top: 1px solid var(--border);
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+      transition: padding-left 0.4s var(--ease);
+      cursor: pointer;
+    }
+    .proj-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent-dim);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.5s var(--ease);
+    }
+    .proj-item:hover { padding-left: 12px; }
+    .proj-item:hover::before { transform: scaleX(1); }
+
+    .proj-n {
+      font-family: var(--f-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      padding-top: 6px;
+      z-index: 1;
+    }
+    .proj-body { z-index: 1; }
+    .proj-name {
+      font-family: var(--f-display);
+      font-weight: 800;
+      font-size: clamp(24px, 3.5vw, 44px);
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin-bottom: 12px;
+      transition: color 0.3s;
+    }
+    .proj-item:hover .proj-name { color: var(--accent); }
+    .proj-desc {
+      font-size: 18px;
+      line-height: 1.75;
+      color: rgba(242,238,229,0.45);
+      max-width: 560px;
+      margin-bottom: 18px;
+    }
+    .proj-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 11px;
+      background: rgba(255,77,46,0.08);
+      color: var(--accent);
+      border-radius: 3px;
+      border: 1px solid rgba(255,77,46,0.18);
+    }
+    .proj-arrow {
+      font-size: 22px;
+      color: var(--text-muted);
+      z-index: 1;
+      align-self: flex-start;
+      padding-top: 6px;
+      transition: color 0.3s, transform 0.35s var(--ease);
+    }
+    .proj-item:hover .proj-arrow { color: var(--accent); transform: translate(5px,-5px); }
+
+    /* ─── Skills ─────────────────────────────────────────── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 64px;
+    }
+    .sk-cat-label {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+    }
+    .sk-list { display: flex; flex-direction: column; }
+    .sk-item {
+      font-family: var(--f-display);
+      font-weight: 700;
+      font-size: clamp(18px, 2.2vw, 32px);
+      letter-spacing: -0.02em;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      transition: color 0.3s, padding-left 0.3s var(--ease);
+      cursor: default;
+    }
+    .sk-item:hover { color: var(--accent); padding-left: 8px; }
+
+    /* ─── Education ──────────────────────────────────────── */
+    .edu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    .edu-card {
+      border: 1px solid var(--border);
+      padding: 44px;
+      border-radius: 6px;
+      transition: border-color 0.35s, background 0.35s;
+      cursor: default;
+    }
+    .edu-card:hover { border-color: var(--border-h); background: rgba(255,77,46,0.03); }
+    .edu-badge {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 22px;
+    }
+    .edu-inst {
+      font-family: var(--f-display);
+      font-weight: 800;
+      font-size: clamp(20px, 2.5vw, 36px);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+    .edu-degree {
+      font-size: 18px;
+      color: rgba(242,238,229,0.55);
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .edu-meta {
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .edu-gpa {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 5px 14px;
+      margin-top: 18px;
+    }
+    .gpa-star { color: var(--accent); }
+
+    /* ─── Contact ────────────────────────────────────────── */
+    .contact-section {
+      padding: 160px 56px 140px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .contact-bg-word {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--f-display);
+      font-weight: 900;
+      font-size: clamp(100px, 18vw, 280px);
+      color: rgba(255,255,255,0.018);
+      text-transform: uppercase;
+      letter-spacing: -0.06em;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .contact-eyebrow {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      position: relative;
+    }
+    .contact-heading {
+      font-family: var(--f-display);
+      font-weight: 900;
+      font-size: clamp(44px, 9vw, 120px);
+      letter-spacing: -0.05em;
+      line-height: 0.95;
+      margin-bottom: 56px;
+      position: relative;
+    }
+    .contact-heading em {
+      color: var(--accent);
+      font-style: normal;
+      display: block;
+    }
+    .contact-email {
+      display: inline-block;
+      font-family: var(--f-display);
+      font-weight: 700;
+      font-size: clamp(18px, 3vw, 36px);
+      letter-spacing: -0.02em;
+      color: var(--text);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      transition: color 0.3s, border-color 0.3s;
+      position: relative;
+    }
+    .contact-email:hover { color: var(--accent); border-color: var(--accent); }
+    .contact-socials {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      margin-top: 72px;
+      position: relative;
+    }
+    .soc-link {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .soc-link:hover { color: var(--text); }
+    .soc-sep {
+      width: 1px; height: 14px;
+      background: var(--border);
+    }
+
+    /* ─── Footer ─────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 36px 56px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .foot-copy {
+      font-size: 16px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+    .foot-mark {
+      font-family: var(--f-display);
+      font-weight: 900;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      color: rgba(242,238,229,0.15);
+    }
+    .foot-mark em { color: var(--accent); font-style: normal; }
+
+    /* ─── Responsive ─────────────────────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 22px 28px; }
+      .nav-links { display: none; }
+      nav.scrolled { backdrop-filter: blur(12px); }
+
+      .hero, .section, .contact-section { padding-left: 28px; padding-right: 28px; }
+      .divider { margin: 0 28px; }
+      .hero { padding-bottom: 56px; }
+
+      .hero-eyebrow { right: 28px; max-width: 220px; }
+      .hero-eyebrow p { font-size: 13px; }
+
+      .about-grid { grid-template-columns: 1fr; gap: 56px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+
+      .exp-item { grid-template-columns: 1fr; gap: 14px; padding: 40px 0; }
+      .exp-n { display: none; }
+      .exp-date { text-align: left; }
+
+      .proj-item { grid-template-columns: 1fr auto; gap: 16px; }
+      .proj-n { display: none; }
+
+      .skills-grid { grid-template-columns: 1fr; gap: 48px; }
+      .edu-grid { grid-template-columns: 1fr; }
+      .edu-card { padding: 32px; }
+
+      .contact-section { padding: 100px 28px 80px; }
+      .contact-socials { flex-wrap: wrap; gap: 22px; }
+      .soc-sep { display: none; }
+
+      footer { flex-direction: column; gap: 16px; text-align: center; padding: 28px; }
+    }
+
+    @media (max-width: 520px) {
+      .hero-eyebrow { display: none; }
+      .hero-footer { flex-direction: column; align-items: flex-start; gap: 28px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .stat-num { font-size: 52px; }
+      .hl-outline { font-size: clamp(52px, 13vw, 120px);}
+      .hl-solid { font-size: clamp(52px, 13vw, 120px);
+    }
+
+    /* ─── Prefers-reduced-motion ─────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cursors -->
+  <div class="cur-dot"  id="curDot"></div>
+  <div class="cur-ring" id="curRing"></div>
+
+  <!-- ─── Navigation ──────────────────────────────────────── -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo" aria-label="Katie Shideler home">KS<em>.</em></a>
+    <ul class="nav-links" role="list">
+      <li><a href="#about">About</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="mailto:shidelerk@gmail.com" class="nav-cta" aria-label="Contact Katie">Let's Talk →</a>
+  </nav>
+
+  <!-- ─── Hero ────────────────────────────────────────────── -->
+  <section class="hero" aria-label="Introduction">
+    <div class="hero-glow" aria-hidden="true"></div>
+
+    <div class="hero-eyebrow" aria-hidden="true">
+      <p class="hero-available"><span class="pulse-dot"></span>Open to opportunities</p>
+      <p>Building responsive, interactive, and visually polished interfaces with Next.js, React &amp; TypeScript.</p>
+    </div>
+
+    <div class="hero-content">
+      <h1 class="hero-headline" aria-label="Katie Shideler, Frontend Developer">
+        <span class="hl-solid">Katie</span>
+        <span class="hl-solid">Shideler</span>
+        <span class="hl-outline">Frontend</span>
+        <span class="hl-outline">Developer</span>
+      </h1>
+      <div class="hero-footer">
+        <div class="hero-meta">
+          <span class="label">Email</span>
+          <a class="value" href="mailto:shidelerk@gmail.com">shidelerk@gmail.com</a>
+        </div>
+        <div class="hero-meta" style="text-align:center;">
+          <span class="label">GitHub</span>
+          <a class="value" href="https://github.com/kshides21" target="_blank" rel="noopener">github.com/kshides21</a>
+        </div>
+        <div class="scroll-hint" aria-hidden="true">
+          <div class="scroll-track"></div>
+          <span>Scroll</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Marquee ─────────────────────────────────────────── -->
+  <div class="marquee-wrap" aria-hidden="true">
+    <div class="marquee-inner">
+      <!-- 2× for seamless loop -->
+      <span class="mi">React<span class="mi-sep"></span></span>
+      <span class="mi">TypeScript<span class="mi-sep"></span></span>
+      <span class="mi">Next.js<span class="mi-sep"></span></span>
+      <span class="mi">Tailwind CSS<span class="mi-sep"></span></span>
+      <span class="mi">Vite<span class="mi-sep"></span></span>
+      <span class="mi">Firebase<span class="mi-sep"></span></span>
+      <span class="mi">Stripe<span class="mi-sep"></span></span>
+      <span class="mi">Vercel<span class="mi-sep"></span></span>
+      <span class="mi">JavaScript<span class="mi-sep"></span></span>
+      <span class="mi">HTML · CSS<span class="mi-sep"></span></span>
+      <span class="mi">React Hook Form<span class="mi-sep"></span></span>
+      <span class="mi">React<span class="mi-sep"></span></span>
+      <span class="mi">TypeScript<span class="mi-sep"></span></span>
+      <span class="mi">Next.js<span class="mi-sep"></span></span>
+      <span class="mi">Tailwind CSS<span class="mi-sep"></span></span>
+      <span class="mi">Vite<span class="mi-sep"></span></span>
+      <span class="mi">Firebase<span class="mi-sep"></span></span>
+      <span class="mi">Stripe<span class="mi-sep"></span></span>
+      <span class="mi">Vercel<span class="mi-sep"></span></span>
+      <span class="mi">JavaScript<span class="mi-sep"></span></span>
+      <span class="mi">HTML · CSS<span class="mi-sep"></span></span>
+      <span class="mi">React Hook Form<span class="mi-sep"></span></span>
+    </div>
+  </div>
+
+  <!-- ─── About ────────────────────────────────────────────── -->
+  <section class="section" id="about" aria-label="About Katie">
+    <div class="section-label"><span class="sn">01</span>About</div>
+    <div class="about-grid">
+
+      <div class="stats-grid">
+        <div class="stat reveal">
+          <div class="stat-num">3<sup>.8</sup></div>
+          <div class="stat-desc">GPA — College<br/>of Wooster</div>
+        </div>
+        <div class="stat reveal d1">
+          <div class="stat-num">2<sup>+</sup></div>
+          <div class="stat-desc">Internship<br/>Positions</div>
+        </div>
+        <div class="stat reveal d2">
+          <div class="stat-num">5<sup>+</sup></div>
+          <div class="stat-desc">Projects<br/>Shipped</div>
+        </div>
+        <div class="stat reveal d3">
+          <div class="stat-num">8<sup>+</sup></div>
+          <div class="stat-desc">Technologies<br/>Mastered</div>
+        </div>
+      </div>
+
+      <div class="about-right">
+        <h2 class="reveal">Building interfaces that <em>feel</em> as good as they look.</h2>
+        <p class="reveal d1">Frontend developer with a Mathematics &amp; Physics background from The College of Wooster. I bring analytical rigour to UI development — creating component-driven, API-integrated applications with a sharp eye for detail and user experience.</p>
+        <p class="reveal d2">With hands-on internship experience at Skinstric AI and Frontend Simplified, I've shipped real-world features: camera integrations, Stripe payment flows, audio players, and data-driven UIs — all built for performance, accessibility, and polish.</p>
+        <div class="interests reveal d3">
+          <div class="interests-title">Outside the editor</div>
+          <div class="tags">
+            <span class="tag">Board Games</span>
+            <span class="tag">CrossFit</span>
+            <span class="tag">College Athletics</span>
+            <span class="tag">Baking</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── Experience ───────────────────────────────────────── -->
+  <section class="section" id="experience" aria-label="Work Experience">
+    <div class="section-label"><span class="sn">02</span>Experience</div>
+    <div class="exp-list">
+
+      <article class="exp-item reveal">
+        <span class="exp-n" aria-hidden="true">01</span>
+        <div>
+          <h3 class="exp-company">Skinstric AI</h3>
+          <p class="exp-role">Frontend Developer Intern · Remote</p>
+          <ul class="exp-bullets" aria-label="Responsibilities at Skinstric AI">
+            <li>Developed UI flows for the Skinstric.ai application using Next.js and CSS</li>
+            <li>Implemented scroll-based and loading animations to enhance usability and guide user interaction</li>
+            <li>Built user input functionality for capturing name and location, stored securely in the database</li>
+            <li>Integrated camera access for real-time photo capture or file upload</li>
+            <li>Created dynamic UI components displaying mock demographic data derived from user imagery</li>
+          </ul>
+        </div>
+        <div class="exp-date">Nov 2025<br/>— Dec 2025</div>
+      </article>
+
+      <article class="exp-item reveal">
+        <span class="exp-n" aria-hidden="true">02</span>
+        <div>
+          <h3 class="exp-company">Frontend Simplified</h3>
+          <p class="exp-role">Frontend Developer Intern · NFT Marketplace · Remote</p>
+          <ul class="exp-bullets" aria-label="Responsibilities at Frontend Simplified — NFT">
+            <li>Built a mock NFT marketplace using React and CSS</li>
+            <li>Fetched and displayed API data for usernames, prices, and artwork listings</li>
+            <li>Implemented countdown timers for time-sensitive NFT listings</li>
+            <li>Added loading states, UI animations, and a dynamic carousel for smoother user interactions</li>
+          </ul>
+        </div>
+        <div class="exp-date">Oct 2025<br/>— Nov 2025</div>
+      </article>
+
+      <article class="exp-item reveal">
+        <span class="exp-n" aria-hidden="true">03</span>
+        <div>
+          <h3 class="exp-company">Frontend Simplified</h3>
+          <p class="exp-role">Frontend Developer Intern · Summarist Library · Remote</p>
+          <ul class="exp-bullets" aria-label="Responsibilities at Frontend Simplified — Summarist">
+            <li>Developed a mock digital library application using React and CSS</li>
+            <li>Fetched API data to display book details including title, author, and cover art</li>
+            <li>Integrated Stripe for plan selection and payment authorization</li>
+            <li>Built a full audio player with play, pause, skip, and rewind controls</li>
+            <li>Enabled users to manage wishlists and finished-book collections</li>
+          </ul>
+        </div>
+        <div class="exp-date">Sep 2025<br/>— Oct 2025</div>
+      </article>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── Projects ─────────────────────────────────────────── -->
+  <section class="section" id="projects" aria-label="Selected Projects">
+    <div class="section-label"><span class="sn">03</span>Projects</div>
+    <div class="proj-list">
+
+      <a class="proj-item reveal" href="https://game-menu.vercel.app/" target="_blank" rel="noopener" aria-label="View Pause Menu / Game UI System project">
+        <span class="proj-n" aria-hidden="true">01</span>
+        <div class="proj-body">
+          <h3 class="proj-name">Pause Menu / Game UI System</h3>
+          <p class="proj-desc">A game-ready pause menu UI featuring a responsive map interaction system, equipment-based stat recalculation, and universal settings controls. Abilities Tree logic dynamically responds to available Experience Points and unlocked abilities.</p>
+          <div class="proj-chips">
+            <span class="chip">Vite</span>
+            <span class="chip">JavaScript</span>
+            <span class="chip">CSS</span>
+          </div>
+        </div>
+        <span class="proj-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="proj-item reveal" href="https://choose-character.vercel.app/" target="_blank" rel="noopener" aria-label="View Video Game Intro project">
+        <span class="proj-n" aria-hidden="true">02</span>
+        <div class="proj-body">
+          <h3 class="proj-name">Video Game Intro</h3>
+          <p class="proj-desc">An interactive video game character selection experience built with Vite and standard CSS. Dynamic stat bars update based on character and item choices. Includes loading screens, music toggle, and day/night mode switching.</p>
+          <div class="proj-chips">
+            <span class="chip">Vite</span>
+            <span class="chip">JavaScript</span>
+            <span class="chip">CSS</span>
+          </div>
+        </div>
+        <span class="proj-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="proj-item reveal" href="https://nobel-prize-react-seven.vercel.app/" target="_blank" rel="noopener" aria-label="View Nobel Prize Search App project">
+        <span class="proj-n" aria-hidden="true">03</span>
+        <div class="proj-body">
+          <h3 class="proj-name">Nobel Prize Search App</h3>
+          <p class="proj-desc">A fully functional search application for Nobel Prize winners built in React. Integrated a real search API with dynamic routing for global results and individual winner pages. Responsive UI with loading states and clean data presentation.</p>
+          <div class="proj-chips">
+            <span class="chip">React</span>
+            <span class="chip">JavaScript</span>
+            <span class="chip">API</span>
+            <span class="chip">CSS</span>
+          </div>
+        </div>
+        <span class="proj-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="proj-item reveal" href="https://summarist-home-page-74gr.vercel.app/" target="_blank" rel="noopener" aria-label="View Summarist Library project">
+        <span class="proj-n" aria-hidden="true">04</span>
+        <div class="proj-body">
+          <h3 class="proj-name">Summarist Library</h3>
+          <p class="proj-desc">Mock digital library with Stripe payment integration, full audio player controls (play / pause / skip / rewind), API-driven book listings with cover art, and wishlist + finished-book collection management.</p>
+          <div class="proj-chips">
+            <span class="chip">React</span>
+            <span class="chip">Stripe</span>
+            <span class="chip">Firebase</span>
+            <span class="chip">API</span>
+            <span class="chip">CSS</span>
+          </div>
+        </div>
+        <span class="proj-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="proj-item reveal" href="https://katie-internship-katies-projects-4483edfd.vercel.app/" target="_blank" rel="noopener" aria-label="View NFT Marketplace project">
+        <span class="proj-n" aria-hidden="true">05</span>
+        <div class="proj-body">
+          <h3 class="proj-name">NFT Marketplace</h3>
+          <p class="proj-desc">Mock NFT marketplace with live API data for usernames, prices, and artwork. Features countdown timers for time-sensitive listings, loading states, UI entrance animations, and a dynamic image carousel.</p>
+          <div class="proj-chips">
+            <span class="chip">React</span>
+            <span class="chip">API</span>
+            <span class="chip">CSS</span>
+          </div>
+        </div>
+        <span class="proj-arrow" aria-hidden="true">↗</span>
+      </a>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+    <!-- ─── Clones ─────────────────────────────────────────── -->
+  <section class="section" id="clones" aria-label="Selected Clones">
+    <div class="section-label"><span class="sn">04</span>Clones</div>
+    <div class="proj-list">
+
+      <a class="proj-item reveal" href="https://instagram-clone-mu-ashen.vercel.app/" target="_blank" rel="noopener" aria-label="View Instagram Clone">
+        <span class="proj-n" aria-hidden="true">01</span>
+        <div class="proj-body">
+          <h3 class="proj-name">Instagram Clone</h3>
+          <p class="proj-desc">Create a profile, post photos, interact with other user's posts with likes and comments.</p>
+          <div class="proj-chips">
+            <span class="chip">React</span>
+            <span class="chip">CSS</span>
+          </div>
+        </div>
+        <span class="proj-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="proj-item reveal" href="https://spotify-clone-two-khaki.vercel.app/" target="_blank" rel="noopener" aria-label="View Spotify Clone">
+        <span class="proj-n" aria-hidden="true">02</span>
+        <div class="proj-body">
+          <h3 class="proj-name">Spotify Clone</h3>
+          <p class="proj-desc">A responsive music streaming interface to pause/play songs, interact with albums, shuffle playlists and explore.</p>
+          <div class="proj-chips">
+            <span class="chip">React</span>
+            <span class="chip">Tailwind</span>
+          </div>
+        </div>
+        <span class="proj-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="proj-item reveal" href="https://netflix-clone-chi-five-24.vercel.app/" target="_blank" rel="noopener" aria-label="View Netflix Clone">
+        <span class="proj-n" aria-hidden="true">03</span>
+        <div class="proj-body">
+          <h3 class="proj-name">Netflix Clone</h3>
+          <p class="proj-desc">Create an account to log in and out of the application. Users can scroll through available titles, view details, and watch trailers.</p>
+          <div class="proj-chips">
+            <span class="chip">React</span>
+            <span class="chip">Vite</span>
+            <span class="chip">Tailwind</span>
+          </div>
+        </div>
+        <span class="proj-arrow" aria-hidden="true">↗</span>
+      </a>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── Skills ───────────────────────────────────────────── -->
+  <section class="section" id="skills" aria-label="Technical Skills">
+    <div class="section-label"><span class="sn">05</span>Skills</div>
+    <div class="skills-grid">
+
+      <div class="reveal">
+        <div class="sk-cat-label">Languages</div>
+        <div class="sk-list" role="list">
+          <span class="sk-item" role="listitem">TypeScript</span>
+          <span class="sk-item" role="listitem">JavaScript</span>
+          <span class="sk-item" role="listitem">HTML5</span>
+          <span class="sk-item" role="listitem">CSS3</span>
+        </div>
+      </div>
+
+      <div class="reveal d1">
+        <div class="sk-cat-label">Frameworks &amp; Libraries</div>
+        <div class="sk-list" role="list">
+          <span class="sk-item" role="listitem">React</span>
+          <span class="sk-item" role="listitem">Next.js</span>
+          <span class="sk-item" role="listitem">Vite</span>
+          <span class="sk-item" role="listitem">Tailwind CSS</span>
+          <span class="sk-item" role="listitem">React Hook Form</span>
+          <span class="sk-item" role="listitem">Firebase</span>
+        </div>
+      </div>
+
+      <div class="reveal d2">
+        <div class="sk-cat-label">Tools &amp; Platforms</div>
+        <div class="sk-list" role="list">
+          <span class="sk-item" role="listitem">Vercel</span>
+          <span class="sk-item" role="listitem">GitHub</span>
+          <span class="sk-item" role="listitem">Stripe</span>
+          <span class="sk-item" role="listitem">VS Code</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── Education ────────────────────────────────────────── -->
+  <section class="section" id="education" aria-label="Education">
+    <div class="section-label"><span class="sn">06</span>Education</div>
+    <div class="edu-grid">
+
+      <div class="edu-card reveal">
+        <div class="edu-badge">Certificate · 2025</div>
+        <h3 class="edu-inst">Frontend Simplified</h3>
+        <p class="edu-degree">Frontend Development Certificate</p>
+        <p class="edu-meta">July 2025 – December 2025</p>
+      </div>
+
+      <div class="edu-card reveal d1">
+        <div class="edu-badge">Bachelor of Arts · 2021</div>
+        <h3 class="edu-inst">The College of Wooster</h3>
+        <p class="edu-degree">B.A. in Mathematics &amp; Physics</p>
+        <p class="edu-meta">August 2017 – May 2021</p>
+        <p class="edu-gpa"><span class="gpa-star" aria-hidden="true">★</span> GPA: 3.8 / 4.0</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── Contact ──────────────────────────────────────────── -->
+  <section class="contact-section" id="contact" aria-label="Contact">
+    <div class="contact-bg-word" aria-hidden="true">Hello</div>
+    <p class="contact-eyebrow reveal">Get in touch</p>
+    <h2 class="contact-heading reveal d1">
+      Got a project?
+      <em>Let's build it.</em>
+    </h2>
+    <a href="mailto:shidelerk@gmail.com" class="contact-email reveal d2" aria-label="Send email to shidelerk@gmail.com">shidelerk@gmail.com</a>
+    <nav class="contact-socials reveal d3" aria-label="Social links">
+      <a href="https://linkedin.com/in/katieshideler" class="soc-link" target="_blank" rel="noopener">LinkedIn</a>
+      <span class="soc-sep" aria-hidden="true"></span>
+      <a href="https://github.com/kshides21" class="soc-link" target="_blank" rel="noopener">GitHub</a>
+      <span class="soc-sep" aria-hidden="true"></span>
+      <a href="tel:+14123989127" class="soc-link">+1 (412) 398 9127</a>
+      <span class="soc-sep" aria-hidden="true"></span>
+      <a href="resumeFES.pdf" class="soc-link" target="_blank" rel="noopener">Resume ↗</a>
+    </nav>
+  </section>
+
+  <!-- ─── Footer ───────────────────────────────────────────── -->
+  <footer>
+    <span class="foot-copy">© 2026 Katie Shideler</span>
+    <span class="foot-mark" aria-hidden="true">KS<em>.</em></span>
+    <span class="foot-copy">Frontend Developer</span>
+  </footer>
+
+  <!-- ─── Scripts ──────────────────────────────────────────── -->
+  <script>
+    /* ── Custom Cursor ── */
+    const dot  = document.getElementById('curDot');
+    const ring = document.getElementById('curRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = mx + 'px';
+      dot.style.top  = my + 'px';
+    });
+
+    (function tick() {
+      rx += (mx - rx) * 0.11;
+      ry += (my - ry) * 0.11;
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      requestAnimationFrame(tick);
+    })();
+
+    const hoverEls = document.querySelectorAll('a, button, .exp-item, .edu-card, .tag, .sk-item');
+    hoverEls.forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+    });
+
+    /* ── Scroll Reveal ── */
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -48px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    /* ── Navbar hide / show on scroll ── */
+    const navbar = document.getElementById('navbar');
+    let lastY = 0;
+
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      navbar.classList.toggle('scrolled', y > 40);
+      if (y > lastY && y > 120) {
+        navbar.classList.add('hidden');
+      } else {
+        navbar.classList.remove('hidden');
+      }
+      lastY = y;
+    }, { passive: true });
+  </script>
+</body>
+</html>
