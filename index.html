@@ -127,6 +127,15 @@
         transform: translateY(-100%);
       }
 
+      .nav-logo-container {
+        display: flex;
+        justify-content: space-between;
+      }
+      
+      .nav-logo-toggle {
+        margin-left: 24px;
+      }
+
       .nav-logo {
         font-family: var(--f-display);
         font-weight: 800;
@@ -1075,23 +1084,26 @@
 
     <!-- ─── Navigation ──────────────────────────────────────── -->
     <nav id="navbar">
+      <div class="nav-logo-container">
       <a href="#" class="nav-logo" aria-label="Katie Shideler home"
         >KS<em>.</em></a
       >
+      <a id="themeToggle" class="theme-toggle nav-logo-toggle">☀️</a>
+      </div>
       <ul class="nav-links" role="list">
         <li><a href="#about">About</a></li>
         <li><a href="#experience">Experience</a></li>
         <li><a href="#projects">Projects</a></li>
         <li><a href="#skills">Skills</a></li>
         <li><a href="#contact">Contact</a></li>
-        <li><a id="themeToggle" class="theme-toggle">☀️</a></li>
       </ul>
-      <a
-        href="mailto:shidelerk@gmail.com"
-        class="nav-cta"
-        aria-label="Contact Katie"
-        >Let's Talk →</a
-      >
+        
+          <a
+            href="mailto:shidelerk@gmail.com"
+            class="nav-cta"
+            aria-label="Contact Katie"
+            >Let's Talk →</a
+          >
     </nav>
 
     <!-- ─── Hero ────────────────────────────────────────────── -->
